@@ -3,22 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokemon Chaos Cup - Calendario Real</title>
+    <title>Pokemon Chaos Cup - Bloqueo Total</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@600&display=swap" rel="stylesheet">
     <style>
         :root { --turq: #00f5ff; --purp: #bc13fe; --bg: #000000; }
         body { background: var(--bg); color: white; font-family: 'Rajdhani', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(188, 19, 254, 0.05) 3px); }
         .container { background: rgba(5, 5, 5, 0.95); border: 2px solid var(--purp); box-shadow: 0 0 20px var(--purp); border-radius: 20px; padding: 30px; width: 90%; max-width: 400px; text-align: center; }
-        h1 { font-family: 'Orbitron', sans-serif; color: var(--turq); text-shadow: 0 0 10px var(--turq); font-size: 1.5em; }
+        h1 { font-family: 'Orbitron', sans-serif; color: var(--turq); text-shadow: 0 0 10px var(--turq); }
         input { width: 85%; padding: 12px; margin: 8px 0; background: #111; border: 1px solid var(--purp); color: var(--turq); border-radius: 5px; font-family: 'Orbitron', sans-serif; text-align: center; }
         .btn { width: 100%; padding: 15px; margin-top: 10px; border: none; border-radius: 50px; font-family: 'Orbitron', sans-serif; font-weight: bold; cursor: pointer; background: var(--purp); color: white; box-shadow: 0 0 10px var(--purp); }
-        .btn:hover { background: var(--turq); color: black; }
+        .btn:hover:not(:disabled) { background: var(--turq); color: black; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .wheel-box { position: relative; width: 250px; height: 250px; margin: 20px auto; border: 4px solid var(--turq); border-radius: 50%; }
         canvas { width: 100%; height: 100%; border-radius: 50%; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
         .pointer { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid var(--turq); z-index: 10; }
         .hidden { display: none !important; }
-        #status-msg { font-size: 0.8em; color: var(--turq); margin-bottom: 10px; font-weight: bold; }
-        #result-display { font-family: 'Orbitron', sans-serif; color: var(--turq); margin-top: 15px; font-size: 1.1em; }
+        #status-msg { font-size: 0.8em; color: var(--turq); margin-bottom: 10px; font-weight: bold; min-height: 1.2em; }
+        #result-display { font-family: 'Orbitron', sans-serif; color: var(--purp); text-shadow: 0 0 5px var(--purp); margin-top: 15px; font-size: 1.1em; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -38,6 +39,7 @@
             <canvas id="wheel" width="500" height="500"></canvas>
         </div>
         <div id="ticket-area" class="hidden">
+            <p style="font-size: 0.7em; color: var(--purp); margin-bottom: 5px;">SISTEMA BLOQUEADO</p>
             <input type="password" id="ticket-in" placeholder="INGRESA TICKET MAESTRO">
         </div>
         <button class="btn" id="spin-btn" onclick="spin()">GIRAR RULETA</button>
@@ -52,8 +54,7 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN CENTRAL
-        const MASTER_TICKET = ""; 
+        const MASTER_TICKET = "BOCCHI-ROCK"; 
         const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1465016757910769705/ODWb5Q5vgXxN3POMZ6-znJ_lX_-tMHQ5LxvS6HYZBHe5o3QvxdVU5kuXuZjSpxxieESG"; 
 
         let PREMIOS = [
@@ -69,7 +70,7 @@
         let logs = JSON.parse(localStorage.getItem('bocchi_v5_logs')) || [];
         let activeUser = null;
 
-        document.getElementById('cupos').innerText = `JUGADORES: ${users.length} / 1`;
+        document.getElementById('cupos').innerText = `JUGADORES: ${users.length} / 13`;
 
         function login() {
             const u = document.getElementById('user-in').value.trim();
@@ -85,12 +86,12 @@
 
             let user = users.find(x => x.name === u);
             if(!user) {
-                if(users.length >= 1) { alert("SISTEMA LLENO"); return; }
-                user = { name: u, pass: p, last: null };
+                if(users.length >= 13) { alert("SISTEMA LLENO"); return; }
+                user = { name: u, pass: p, lastFree: null, lastExtra: null };
                 users.push(user);
-                localStorage.setItem('bocchi_v5_users', JSON.stringify(users));
+                save();
             } else if(user.pass !== p) {
-                alert("CONTRASEÑA INCORRECTA"); return;
+                alert("PASS INCORRECTA"); return;
             }
 
             activeUser = user;
@@ -101,43 +102,47 @@
         }
 
         function checkCalendar() {
-            const hoy = new Date();
-            const diaDelMes = hoy.getDate();
-            const esImpar = (diaDelMes % 2 !== 0);
-            const yaGiroHoy = (activeUser.last === hoy.toDateString());
+            const hoy = new Date().toDateString();
+            const esImpar = (new Date().getDate() % 2 !== 0);
+            const yaUsoGratis = (activeUser.lastFree === hoy);
+            const yaUsoExtra = (activeUser.lastExtra === hoy);
             
             const msg = document.getElementById('status-msg');
             const ticketArea = document.getElementById('ticket-area');
 
-            if (!esImpar) {
-                msg.innerText = `HOY ES DÍA ${diaDelMes} (PAR): BLOQUEADO`;
-                ticketArea.classList.remove('hidden');
-            } else if (yaGiroHoy) {
-                msg.innerText = "YA RECLAMASTE TU GIRO GRATIS DE HOY";
+            if (!esImpar || yaUsoGratis) {
+                msg.innerText = yaUsoExtra ? "SISTEMA AGOTADO POR HOY" : "SE REQUIERE TICKET MAESTRO";
                 ticketArea.classList.remove('hidden');
             } else {
-                msg.innerText = `HOY ES DÍA ${diaDelMes} (IMPAR): ¡GIRO GRATIS DISPONIBLE!`;
+                msg.innerText = "¡GIRO GRATIS DISPONIBLE!";
                 ticketArea.classList.add('hidden');
             }
         }
 
         function spin() {
-            const hoy = new Date();
-            const esImpar = (hoy.getDate() % 2 !== 0);
-            const yaGiroHoy = (activeUser.last === hoy.toDateString());
+            const hoy = new Date().toDateString();
+            const esImpar = (new Date().getDate() % 2 !== 0);
+            const yaUsoGratis = (activeUser.lastFree === hoy);
+            const yaUsoExtra = (activeUser.lastExtra === hoy);
 
-            // Si es día par o ya giró, validar ticket
-            if(!esImpar || yaGiroHoy) {
+            if (yaUsoExtra) {
+                alert("Ya has usado tu giro gratis y tu ticket extra de hoy. ¡Vuelve mañana!");
+                return;
+            }
+
+            let usandoTicket = false;
+            if(!esImpar || yaUsoGratis) {
                 const tk = document.getElementById('ticket-in').value.trim();
                 if(tk !== MASTER_TICKET) {
-                    alert("CÓDIGO INCORRECTO: Hoy no es día de giro gratis o ya usaste el tuyo.");
+                    alert("TICKET INVÁLIDO");
                     return;
                 }
+                usandoTicket = true;
             }
 
             const btn = document.getElementById('spin-btn');
             btn.disabled = true;
-            document.getElementById('result-display').innerText = "GIRANDO...";
+            document.getElementById('result-display').innerText = "SORTEANDO...";
 
             const deg = Math.floor(3600 + Math.random() * 360);
             document.getElementById('wheel').style.transform = `rotate(${deg}deg)`;
@@ -148,22 +153,32 @@
             for(let i of PREMIOS) { if(r < i.w) { win = i; break; } r -= i.w; }
 
             setTimeout(() => {
-                document.getElementById('result-display').innerText = `¡HAS OBTENIDO: ${win.n}!`;
-                activeUser.last = hoy.toDateString();
-                logs.unshift({ user: activeUser.name, prize: win.n, time: hoy.toLocaleTimeString() });
-                localStorage.setItem('bocchi_v5_logs', JSON.stringify(logs));
-                localStorage.setItem('bocchi_v5_users', JSON.stringify(users));
+                document.getElementById('result-display').innerText = `¡${win.n}!`;
+                
+                if (usandoTicket) {
+                    activeUser.lastExtra = hoy; // Bloqueo de Ticket usado
+                } else {
+                    activeUser.lastFree = hoy; // Bloqueo de Giro Gratis usado
+                }
+
+                logs.unshift({ user: activeUser.name, prize: win.n, time: new Date().toLocaleTimeString() });
+                save();
                 
                 fetch(DISCORD_WEBHOOK, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({content: `🎰 **${activeUser.name}** ha girado la ruleta:\n**Premio:** ${win.n}\n**Rango:** ${win.r}`})
+                    body: JSON.stringify({content: `🎰 **${activeUser.name}**\n**Premio:** ${win.n}\n**Tipo:** ${usandoTicket ? "🎟️ TICKET EXTRA" : "🆓 GRATIS"}`})
                 }).catch(() => {});
 
                 btn.disabled = false;
+                document.getElementById('ticket-in').value = ""; 
                 checkCalendar();
-                document.getElementById('ticket-in').value = ""; // Limpiar ticket usado
             }, 4000);
+        }
+
+        function save() {
+            localStorage.setItem('bocchi_v5_users', JSON.stringify(users));
+            localStorage.setItem('bocchi_v5_logs', JSON.stringify(logs));
         }
 
         function draw() {
@@ -184,6 +199,7 @@
     </script>
 </body>
 </html>
+
 
 
 
