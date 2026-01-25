@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bocchi Nuzlocke - NEON EDITION</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --turquoise: #00f5ff;
+            --purple: #bc13fe;
+            --black: #000000;
+            --white: #ffffff;
+        }
+
+        body {
+            background-color: var(--black);
+            background-image: linear-gradient(to bottom, rgba(0,0,0,0.9), rgba(0,0,0,0.9)),
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(188, 19, 254, 0.05) 3px);
+            color: var(--white);
+            font-family: 'Rajdhani', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .neon-container {
+            background: rgba(5, 5, 5, 0.95);
+            border: 2px solid var(--purple);
+            box-shadow: 0 0 20px var(--purple);
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--turquoise);
+            text-shadow: 0 0 10px var(--turquoise);
+            letter-spacing: 2px;
+        }
+
+        input {
+            width: 85%;
+            padding: 12px;
+            margin: 10px 0;
+            background: #111;
+            border: 1px solid var(--purple);
+            color: var(--turquoise);
+            border-radius: 5px;
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            background: var(--purple);
+            color: white;
+            box-shadow: 0 0 10px var(--purple);
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background: var(--turquoise);
+            color: black;
+            box-shadow: 0 0 20px var(--turquoise);
+        }
+
+        .wheel-outer {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            margin: 20px auto;
+            border: 4px solid var(--turquoise);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--turquoise);
+        }
+
+        canvas { width: 100%; height: 100%; border-radius: 50%; }
+
+        .pointer {
+            position: absolute;
+            top: -10px; left: 50%; transform: translateX(-50%);
+            width: 0; height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid var(--turquoise);
+            z-index: 10;
+        }
+
+        #result-revealed {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--purple);
+            text-shadow: 0 0 10px var(--purple);
+            font-size: 1.3em;
+            margin-top: 15px;
+            min-height: 1.5em;
+        }
+
+        .admin-table {
+            width: 100%;
+            font-size: 0.8em;
+            border-collapse: collapse;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .admin-table th { color: var(--turquoise); border-bottom: 1px solid var(--purple); padding: 5px; }
+        .admin-table td { padding: 8px 5px; border-bottom: 1px solid #222; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen" class="neon-container">
+        <h1>BOCCHI NEON</h1>
+        <p id="cupo-text" style="color: var(--purple); font-size: 0.8em;"></p>
+        <input type="text" id="user-in" placeholder="USUARIO">
+        <input type="password" id="pass-in" placeholder="CONTRASEÑA">
+        <button class="btn" onclick="login()">ACCEDER</button>
+    </div>
+
+    <div id="app-screen" class="neon-container hidden">
+        <h2 id="greet" style="font-family: 'Orbitron'; font-size: 0.9em; color: var(--turquoise);"></h2>
+        <div class="wheel-outer">
+            <div class="pointer"></div>
+            <canvas id="wheel" width="500" height="500"></canvas>
+        </div>
+        <div id="ticket-section" class="hidden">
+            <input type="password" id="ticket-in" placeholder="TICKET MAESTRO">
+        </div>
+        <button class="btn" id="spin-btn" onclick="spin()">GIRAR</button>
+        <div id="result-revealed"></div>
+        <button onclick="location.reload()" style="background:none; border:none; color:gray; cursor:pointer; margin-top:10px; font-size:0.7em;">Cerrar Sesión</button>
+    </div>
+
+    <div id="admin-screen" class="neon-container hidden" style="max-width: 500px;">
+        <h1 style="font-size: 1.5em;">CENTRAL DE DATOS</h1>
+        <div style="max-height: 300px; overflow-y: auto;">
+            <table class="admin-table">
+                <thead>
+                    <tr><th>User</th><th>Premio</th><th>Hora</th></tr>
+                </thead>
+                <tbody id="admin-log"></tbody>
+            </table>
+        </div>
+        <button class="btn" onclick="location.reload()">VOLVER</button>
+    </div>
+
+    <script>
+        const MASTER_TICKET = "BOCCHI-ROCK";
+        const DISCORD_WEBHOOK = "TU_WEBHOOK_AQUÍ"; // Pon tu link aquí si quieres avisos al móvil
+
+        const PREMIOS = [
+            {n: "Hero’s Never Die", r: "SS", w: 1}, {n: "Alteración Genética", r: "SS", w: 1}, {n: "EGOist", r: "SS", w: 1},
+            {n: "Robo de Pokémon", r: "S", w: 4}, {n: "Randomlocke Rainbow", r: "S", w: 4}, {n: "Banhammer", r: "S", w: 4},
+            {n: "Gachapón", r: "A", w: 10}, {n: "Revivir Pokémon", r: "A", w: 10}, {n: "Cambio de Suerte", r: "A", w: 10},
+            {n: "Reversa", r: "A", w: 10}, {n: "Debug", r: "A", w: 10}, {n: "Sepulturero", r: "A", w: 10},
+            {n: "Bufón", r: "B", w: 25}, {n: "Recaptura Avanzada", r: "B", w: 25}, {n: "Infinidad", r: "B", w: 25},
+            {n: "Skip Pokémon", r: "B", w: 25}, {n: "Escudo Protector", r: "B", w: 25}, {n: "Trueque", r: "B", w: 25}
+        ];
+
+        let users = JSON.parse(localStorage.getItem('bocchi_final_users')) || [];
+        let logs = JSON.parse(localStorage.getItem('bocchi_final_logs')) || [];
+        let activeUser = null;
+
+        document.getElementById('cupo-text').innerText = `CONEXIONES: ${users.length} / 13`;
+
+        function login() {
+            const u = document.getElementById('user-in').value.trim();
+            const p = document.getElementById('pass-in').value.trim();
+
+            if(u === "BocchiAdmin" && p === "Luna288") {
+                showAdmin();
+                return;
+            }
+
+            let user = users.find(x => x.name === u);
+            if(!user) {
+                if(users.length >= 13) return alert("CUPOS AGOTADOS");
+                user = { name: u, pass: p, last: null };
+                users.push(user);
+                save();
+            }
+            if(user.pass !== p) return alert("PASSWORD ERROR");
+            
+            activeUser = user;
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app-screen').classList.remove('hidden');
+            document.getElementById('greet').innerText = `LOGGED_IN: ${u}`;
+            checkStatus();
+            draw();
+        }
+
+        function checkStatus() {
+            const isFree = (new Date().getDate() % 2 !== 0);
+            const already = (activeUser.last === new Date().toDateString());
+            if(already || !isFree) document.getElementById('ticket-section').classList.remove('hidden');
+        }
+
+        function spin() {
+            const isFree = (new Date().getDate() % 2 !== 0);
+            const already = (activeUser.last === new Date().toDateString());
+            if((already || !isFree) && document.getElementById('ticket-in').value !== MASTER_TICKET) return alert("TICKET INVÁLIDO");
+
+            document.getElementById('spin-btn').disabled = true;
+            const total = PREMIOS.reduce((s,i) => s + i.w, 0);
+            let r = Math.random() * total;
+            let win = PREMIOS[0];
+            for(let i of PREMIOS) { if(r < i.w) { win = i; break; } r -= i.w; }
+
+            let angle = 0; let speed = 35;
+            const timer = setInterval(() => {
+                angle += speed; speed *= 0.98;
+                document.getElementById('wheel').style.transform = `rotate(${angle}deg)`;
+                if(speed < 0.2) {
+                    clearInterval(timer);
+                    finish(win);
+                }
+            }, 30);
+        }
+
+        function finish(win) {
+            document.getElementById('result-revealed').innerText = `GANASTE: ${win.n}`;
+            activeUser.last = new Date().toDateString();
+            logs.unshift({ user: activeUser.name, prize: win.n, time: new Date().toLocaleTimeString() });
+            localStorage.setItem('bocchi_final_logs', JSON.stringify(logs));
+            save();
+            document.getElementById('spin-btn').disabled = false;
+        }
+
+        function showAdmin() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('admin-screen').classList.remove('hidden');
+            const list = document.getElementById('admin-log');
+            list.innerHTML = logs.map(l => `<tr><td>${l.user}</td><td>${l.prize}</td><td>${l.time}</td></tr>`).join('');
+        }
+
+        function save() { localStorage.setItem('bocchi_final_users', JSON.stringify(users)); }
+
+        function draw() {
+            const canvas = document.getElementById('wheel');
+            const ctx = canvas.getContext('2d');
+            const arc = Math.PI * 2 / PREMIOS.length;
+            for(let i=0; i<PREMIOS.length; i++) {
+                ctx.fillStyle = (i % 2 === 0) ? "#000" : "#111";
+                ctx.beginPath(); ctx.moveTo(250,250);
+                ctx.arc(250, 250, 250, i*arc, (i+1)*arc);
+                ctx.fill();
+                ctx.strokeStyle = "#bc13fe"; ctx.stroke();
+                ctx.save(); ctx.translate(250,250); ctx.rotate(i*arc + arc/2);
+                ctx.fillStyle = "#00f5ff"; ctx.font = "bold 20px Orbitron";
+                ctx.fillText(PREMIOS[i].r, 170, 8); ctx.restore();
+            }
+        }
+    </script>
+</body>
+</html>
