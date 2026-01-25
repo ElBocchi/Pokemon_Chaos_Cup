@@ -85,7 +85,7 @@
 
             let user = users.find(x => x.name === u);
             if(!user) {
-                if(users.length >= 13) { alert("SISTEMA LLENO"); return; }
+                if(users.length >= 1) { alert("SISTEMA LLENO"); return; }
                 user = { name: u, pass: p, last: null };
                 users.push(user);
                 localStorage.setItem('bocchi_v5_users', JSON.stringify(users));
@@ -184,5 +184,6 @@
     </script>
 </body>
 </html>
+
 
 
