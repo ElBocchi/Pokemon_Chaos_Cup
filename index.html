@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokemon Chaos Cup</title>
+    <title>Pokemon Chaos Cup - Calendario Real</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@600&display=swap" rel="stylesheet">
     <style>
         :root { --turq: #00f5ff; --purp: #bc13fe; --bg: #000000; }
         body { background: var(--bg); color: white; font-family: 'Rajdhani', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(188, 19, 254, 0.05) 3px); }
         .container { background: rgba(5, 5, 5, 0.95); border: 2px solid var(--purp); box-shadow: 0 0 20px var(--purp); border-radius: 20px; padding: 30px; width: 90%; max-width: 400px; text-align: center; }
-        h1 { font-family: 'Orbitron', sans-serif; color: var(--turq); text-shadow: 0 0 10px var(--turq); }
+        h1 { font-family: 'Orbitron', sans-serif; color: var(--turq); text-shadow: 0 0 10px var(--turq); font-size: 1.5em; }
         input { width: 85%; padding: 12px; margin: 8px 0; background: #111; border: 1px solid var(--purp); color: var(--turq); border-radius: 5px; font-family: 'Orbitron', sans-serif; text-align: center; }
         .btn { width: 100%; padding: 15px; margin-top: 10px; border: none; border-radius: 50px; font-family: 'Orbitron', sans-serif; font-weight: bold; cursor: pointer; background: var(--purp); color: white; box-shadow: 0 0 10px var(--purp); }
         .btn:hover { background: var(--turq); color: black; }
@@ -17,6 +17,7 @@
         canvas { width: 100%; height: 100%; border-radius: 50%; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
         .pointer { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid var(--turq); z-index: 10; }
         .hidden { display: none !important; }
+        #status-msg { font-size: 0.8em; color: var(--turq); margin-bottom: 10px; font-weight: bold; }
         #result-display { font-family: 'Orbitron', sans-serif; color: var(--turq); margin-top: 15px; font-size: 1.1em; }
     </style>
 </head>
@@ -31,18 +32,17 @@
     </div>
 
     <div id="app-screen" class="container hidden">
-        <h2 id="greet" style="font-size: 0.8em; color: var(--turq);"></h2>
+        <div id="status-msg"></div>
         <div class="wheel-box">
             <div class="pointer"></div>
             <canvas id="wheel" width="500" height="500"></canvas>
         </div>
         <div id="ticket-area" class="hidden">
-            <p style="font-size: 0.7em; color: var(--purp); margin-bottom: 5px;">DÍA BLOQUEADO O YA GIRADO</p>
-            <input type="password" id="ticket-in" placeholder="CÓDIGO TICKET">
+            <input type="password" id="ticket-in" placeholder="INGRESA TICKET MAESTRO">
         </div>
-        <button class="btn" id="spin-btn" onclick="spin()">GIRAR</button>
+        <button class="btn" id="spin-btn" onclick="spin()">GIRAR RULETA</button>
         <div id="result-display"></div>
-        <button onclick="location.reload()" style="background:none; border:none; color:gray; cursor:pointer; margin-top:20px; font-size:0.7em;">LOGOUT</button>
+        <button onclick="location.reload()" style="background:none; border:none; color:gray; cursor:pointer; margin-top:20px; font-size:0.7em;">CERRAR SESIÓN</button>
     </div>
 
     <div id="admin-screen" class="container hidden">
@@ -52,8 +52,8 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN
-        const MASTER_TICKET = ""; 
+        // CONFIGURACIÓN CENTRAL
+        const MASTER_TICKET = "BOCCHI-ROCK"; 
         const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1465016757910769705/ODWb5Q5vgXxN3POMZ6-znJ_lX_-tMHQ5LxvS6HYZBHe5o3QvxdVU5kuXuZjSpxxieESG"; 
 
         let PREMIOS = [
@@ -74,7 +74,7 @@
         function login() {
             const u = document.getElementById('user-in').value.trim();
             const p = document.getElementById('pass-in').value.trim();
-            if(!u || !p) { alert("RELLENA TODO"); return; }
+            if(!u || !p) return;
 
             if(u === "BocchiAdmin" && p === "Luna288") {
                 document.getElementById('login-screen').classList.add('hidden');
@@ -85,42 +85,52 @@
 
             let user = users.find(x => x.name === u);
             if(!user) {
-                if(users.length >= 2) { alert("CUPOS LLENOS"); return; }
+                if(users.length >= 13) { alert("SISTEMA LLENO"); return; }
                 user = { name: u, pass: p, last: null };
                 users.push(user);
                 localStorage.setItem('bocchi_v5_users', JSON.stringify(users));
-                alert("¡REGISTRADO!");
             } else if(user.pass !== p) {
-                alert("ESTE ENTRENADOR YA EXISTE Y LA CONTRASEÑA ES INCORRECTA"); return;
+                alert("CONTRASEÑA INCORRECTA"); return;
             }
 
             activeUser = user;
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('app-screen').classList.remove('hidden');
-            document.getElementById('greet').innerText = `ENTRENADOR: ${u}`;
             draw();
-            updateUIVisibility();
+            checkCalendar();
         }
 
-        function updateUIVisibility() {
-            const esDiaImpar = (new Date().getDate() % 2 !== 0);
-            const yaGiroHoy = (activeUser.last === new Date().toDateString());
+        function checkCalendar() {
+            const hoy = new Date();
+            const diaDelMes = hoy.getDate();
+            const esImpar = (diaDelMes % 2 !== 0);
+            const yaGiroHoy = (activeUser.last === hoy.toDateString());
             
-            // Bloquea si ya giró hoy O si es día par (2, 4, 6...)
-            if(yaGiroHoy || !esDiaImpar) {
-                document.getElementById('ticket-area').classList.remove('hidden');
+            const msg = document.getElementById('status-msg');
+            const ticketArea = document.getElementById('ticket-area');
+
+            if (!esImpar) {
+                msg.innerText = `HOY ES DÍA ${diaDelMes} (PAR): BLOQUEADO`;
+                ticketArea.classList.remove('hidden');
+            } else if (yaGiroHoy) {
+                msg.innerText = "YA RECLAMASTE TU GIRO GRATIS DE HOY";
+                ticketArea.classList.remove('hidden');
             } else {
-                document.getElementById('ticket-area').classList.add('hidden');
+                msg.innerText = `HOY ES DÍA ${diaDelMes} (IMPAR): ¡GIRO GRATIS DISPONIBLE!`;
+                ticketArea.classList.add('hidden');
             }
         }
 
         function spin() {
-            const esDiaImpar = (new Date().getDate() % 2 !== 0);
-            const yaGiroHoy = (activeUser.last === new Date().toDateString());
-            
-            if(yaGiroHoy || !esDiaImpar) {
-                if(document.getElementById('ticket-in').value !== MASTER_TICKET) {
-                    alert("SISTEMA BLOQUEADO: Necesitas el Ticket Maestro para girar hoy."); 
+            const hoy = new Date();
+            const esImpar = (hoy.getDate() % 2 !== 0);
+            const yaGiroHoy = (activeUser.last === hoy.toDateString());
+
+            // Si es día par o ya giró, validar ticket
+            if(!esImpar || yaGiroHoy) {
+                const tk = document.getElementById('ticket-in').value.trim();
+                if(tk !== MASTER_TICKET) {
+                    alert("CÓDIGO INCORRECTO: Hoy no es día de giro gratis o ya usaste el tuyo.");
                     return;
                 }
             }
@@ -138,21 +148,21 @@
             for(let i of PREMIOS) { if(r < i.w) { win = i; break; } r -= i.w; }
 
             setTimeout(() => {
-                document.getElementById('result-display').innerText = `¡GANASTE: ${win.n}!`;
-                activeUser.last = new Date().toDateString();
-                logs.unshift({ user: activeUser.name, prize: win.n, time: new Date().toLocaleTimeString() });
+                document.getElementById('result-display').innerText = `¡HAS OBTENIDO: ${win.n}!`;
+                activeUser.last = hoy.toDateString();
+                logs.unshift({ user: activeUser.name, prize: win.n, time: hoy.toLocaleTimeString() });
                 localStorage.setItem('bocchi_v5_logs', JSON.stringify(logs));
                 localStorage.setItem('bocchi_v5_users', JSON.stringify(users));
                 
-                if(DISCORD_WEBHOOK) {
-                    fetch(DISCORD_WEBHOOK, {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({content: `🏆 **${activeUser.name}** ha ganado: **${win.n}** (Rango ${win.r})`})
-                    }).catch(() => {});
-                }
+                fetch(DISCORD_WEBHOOK, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({content: `🎰 **${activeUser.name}** ha girado la ruleta:\n**Premio:** ${win.n}\n**Rango:** ${win.r}`})
+                }).catch(() => {});
+
                 btn.disabled = false;
-                updateUIVisibility();
+                checkCalendar();
+                document.getElementById('ticket-in').value = ""; // Limpiar ticket usado
             }, 4000);
         }
 
@@ -174,9 +184,4 @@
     </script>
 </body>
 </html>
-
-
-
-
-
 
