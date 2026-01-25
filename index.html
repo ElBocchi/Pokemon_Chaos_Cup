@@ -85,7 +85,7 @@
 
             let user = users.find(x => x.name === u);
             if(!user) {
-                if(users.length >= 13) { alert("CUPOS LLENOS"); return; }
+                if(users.length >= 2) { alert("CUPOS LLENOS"); return; }
                 user = { name: u, pass: p, last: null };
                 users.push(user);
                 localStorage.setItem('bocchi_v5_users', JSON.stringify(users));
@@ -174,6 +174,7 @@
     </script>
 </body>
 </html>
+
 
 
 
