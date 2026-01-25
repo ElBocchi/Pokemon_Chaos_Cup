@@ -3,76 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bocchi Nuzlocke - NEON RANDOM</title>
+    <title>Bocchi Neon - Access System</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@600&display=swap" rel="stylesheet">
     <style>
         :root { --turq: #00f5ff; --purp: #bc13fe; --bg: #000000; }
         body {
-            background: var(--bg);
-            color: white;
-            font-family: 'Rajdhani', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
+            background: var(--bg); color: white; font-family: 'Rajdhani', sans-serif;
+            display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0;
             background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(188, 19, 254, 0.05) 3px);
         }
         .container {
-            background: rgba(5, 5, 5, 0.95);
-            border: 2px solid var(--purp);
-            box-shadow: 0 0 20px var(--purp);
-            border-radius: 20px;
-            padding: 30px;
-            width: 90%;
-            max-width: 420px;
-            text-align: center;
+            background: rgba(5, 5, 5, 0.95); border: 2px solid var(--purp); box-shadow: 0 0 20px var(--purp);
+            border-radius: 20px; padding: 30px; width: 90%; max-width: 420px; text-align: center;
         }
         h1 { font-family: 'Orbitron', sans-serif; color: var(--turq); text-shadow: 0 0 10px var(--turq); letter-spacing: 2px; }
+        .input-group { margin: 15px 0; }
         input {
-            width: 85%; padding: 12px; margin: 10px 0;
-            background: #111; border: 1px solid var(--purp);
-            color: var(--turq); border-radius: 5px;
-            font-family: 'Orbitron', sans-serif; text-align: center;
+            width: 85%; padding: 12px; margin: 5px 0; background: #111; border: 1px solid var(--purp);
+            color: var(--turq); border-radius: 5px; font-family: 'Orbitron', sans-serif; text-align: center;
         }
         .btn {
-            width: 100%; padding: 15px; margin-top: 15px;
-            border: none; border-radius: 50px;
-            font-family: 'Orbitron', sans-serif; font-weight: bold;
-            cursor: pointer; background: var(--purp); color: white;
-            box-shadow: 0 0 10px var(--purp); transition: 0.3s;
+            width: 100%; padding: 15px; margin-top: 10px; border: none; border-radius: 50px;
+            font-family: 'Orbitron', sans-serif; font-weight: bold; cursor: pointer;
+            background: var(--purp); color: white; box-shadow: 0 0 10px var(--purp); transition: 0.3s;
         }
         .btn:hover { background: var(--turq); color: black; box-shadow: 0 0 20px var(--turq); }
-        .wheel-box { position: relative; width: 280px; height: 280px; margin: 20px auto; border: 4px solid var(--turq); border-radius: 50%; box-shadow: 0 0 15px var(--turq); }
+        .wheel-box { position: relative; width: 260px; height: 260px; margin: 20px auto; border: 4px solid var(--turq); border-radius: 50%; box-shadow: 0 0 15px var(--turq); }
         canvas { width: 100%; height: 100%; border-radius: 50%; }
         .pointer { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid var(--turq); z-index: 10; }
-        #result-display { font-family: 'Orbitron', sans-serif; color: var(--purp); text-shadow: 0 0 10px var(--purp); font-size: 1.3em; margin-top: 15px; min-height: 1.5em; }
+        #result-display { font-family: 'Orbitron', sans-serif; color: var(--purp); text-shadow: 0 0 10px var(--purp); font-size: 1.2em; margin-top: 15px; }
         .admin-table { width: 100%; font-size: 0.8em; border-collapse: collapse; margin-top: 20px; }
         .admin-table th { color: var(--turq); border-bottom: 1px solid var(--purp); padding: 5px; }
         .admin-table td { padding: 8px 5px; border-bottom: 1px solid #222; text-align: left; }
         .hidden { display: none !important; }
+        .info-text { font-size: 0.75em; color: #888; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <div id="login-screen" class="container">
-        <h1>BOCCHI NEON</h1>
-        <p id="cupo-info" style="color: var(--purp); font-size: 0.8em;"></p>
-        <input type="text" id="user-in" placeholder="USUARIO">
-        <input type="password" id="pass-in" placeholder="CONTRASEÑA">
-        <button class="btn" onclick="login()">ACCEDER</button>
+        <h1>BOCCHI LOGIN</h1>
+        <div class="input-group">
+            <input type="text" id="user-in" placeholder="NOMBRE DE ENTRENADOR">
+            <input type="password" id="pass-in" placeholder="CONTRASEÑA">
+        </div>
+        <button class="btn" onclick="login()">ENTRAR / REGISTRARSE</button>
+        <p class="info-text">Si es tu primera vez, se creará tu perfil automáticamente.</p>
+        <p id="cupo-info" style="color: var(--purp); font-size: 0.8em; margin-top: 15px;"></p>
     </div>
 
     <div id="app-screen" class="container hidden">
-        <h2 id="greet" style="font-family: 'Orbitron'; font-size: 0.9em; color: var(--turq);"></h2>
+        <h2 id="greet" style="font-family: 'Orbitron'; font-size: 0.9em; color: var(--turq); margin: 0;"></h2>
         <div class="wheel-box">
             <div class="pointer"></div>
             <canvas id="wheel" width="500" height="500"></canvas>
         </div>
         <div id="ticket-area" class="hidden">
-            <p style="font-size: 0.7em; color: var(--purp); margin: 0;">SISTEMA BLOQUEADO - USA TICKET</p>
-            <input type="password" id="ticket-in" placeholder="TICKET MAESTRO">
+            <input type="password" id="ticket-in" placeholder="TICKET DE BOCCHI">
         </div>
         <button class="btn" id="spin-btn" onclick="spin()">GIRAR RULETA</button>
         <div id="result-display"></div>
@@ -81,7 +68,7 @@
 
     <div id="admin-screen" class="container hidden" style="max-width: 500px;">
         <h1>CENTRAL ADMIN</h1>
-        <div style="max-height: 300px; overflow-y: auto;">
+        <div style="max-height: 350px; overflow-y: auto;">
             <table class="admin-table">
                 <thead><tr><th>User</th><th>Premio</th><th>Hora</th></tr></thead>
                 <tbody id="admin-log"></tbody>
@@ -92,9 +79,8 @@
 
     <script>
         const MASTER_TICKET = "BOCCHI-ROCK";
-        const DISCORD_WEBHOOK = "TU_WEBHOOK_AQUÍ"; 
+        const DISCORD_WEBHOOK = "TU_WEBHOOK_AQUÍ";
 
-        // Premios originales
         let PREMIOS = [
             {n: "Hero’s Never Die", r: "SS", w: 1}, {n: "Alteración Genética", r: "SS", w: 1}, {n: "EGOist", r: "SS", w: 1},
             {n: "Robo de Pokémon", r: "S", w: 4}, {n: "Randomlocke Rainbow", r: "S", w: 4}, {n: "Banhammer", r: "S", w: 4},
@@ -102,35 +88,40 @@
             {n: "Reversa", r: "A", w: 10}, {n: "Debug", r: "A", w: 10}, {n: "Sepulturero", r: "A", w: 10},
             {n: "Bufón", r: "B", w: 25}, {n: "Recaptura Avanzada", r: "B", w: 25}, {n: "Infinidad", r: "B", w: 25},
             {n: "Skip Pokémon", r: "B", w: 25}, {n: "Escudo Protector", r: "B", w: 25}, {n: "Trueque", r: "B", w: 25}
-        ];
+        ].sort(() => Math.random() - 0.5);
 
-        // MEZCLAR EL ORDEN ALEATORIAMENTE
-        PREMIOS = PREMIOS.sort(() => Math.random() - 0.5);
-
-        let users = JSON.parse(localStorage.getItem('bocchi_v5_users')) || [];
-        let logs = JSON.parse(localStorage.getItem('bocchi_v5_logs')) || [];
+        let users = JSON.parse(localStorage.getItem('bocchi_final_v1')) || [];
+        let logs = JSON.parse(localStorage.getItem('bocchi_logs_v1')) || [];
         let activeUser = null;
 
-        document.getElementById('cupo-info').innerText = `CONEXIONES: ${users.length} / 13`;
+        document.getElementById('cupo-info').innerText = `JUGADORES REGISTRADOS: ${users.length} / 13`;
 
         function login() {
             const u = document.getElementById('user-in').value.trim();
             const p = document.getElementById('pass-in').value.trim();
-            if(u === "BocchiAdmin" && p === "Luna288") { showAdmin(); return; }
-            if(!u || !p) return;
+            if(!u || !p) return alert("RELLENA LOS CAMPOS");
+
+            // ACCESO ADMIN CAMUFLADO (BocchiAdmin / Luna288)
+            if(btoa(u) === "Qm9jY2hpQWRtaW4=" && btoa(p) === "THVuYTI4OA==") {
+                showAdmin(); return;
+            }
 
             let user = users.find(x => x.name === u);
-            if(!user) {
-                if(users.length >= 13) return alert("SISTEMA LLENO");
+            
+            if(!user) { // REGISTRO NUEVO
+                if(users.length >= 13) return alert("SISTEMA AL MÁXIMO (13/13)");
                 user = { name: u, pass: p, last: null };
                 users.push(user);
                 save();
+                alert("¡REGISTRADO CON ÉXITO!");
+            } else { // INICIO SESIÓN
+                if(user.pass !== p) return alert("CONTRASEÑA INCORRECTA PARA ESTE USUARIO");
             }
-            if(user.pass !== p) return alert("PASS ERROR");
+
             activeUser = user;
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('app-screen').classList.remove('hidden');
-            document.getElementById('greet').innerText = `USER: ${u}`;
+            document.getElementById('greet').innerText = `SISTEMA: ${u}`;
             checkStatus();
             draw();
         }
@@ -138,25 +129,17 @@
         function checkStatus() {
             const isFree = (new Date().getDate() % 2 !== 0);
             const already = (activeUser.last === new Date().toDateString());
-            if(already || !isFree) {
-                document.getElementById('ticket-area').classList.remove('hidden');
-            } else {
-                document.getElementById('ticket-area').classList.add('hidden');
-            }
+            if(already || !isFree) document.getElementById('ticket-area').classList.remove('hidden');
         }
 
         function spin() {
             const isFree = (new Date().getDate() % 2 !== 0);
             const already = (activeUser.last === new Date().toDateString());
-            
-            if(already || !isFree) {
-                const tk = document.getElementById('ticket-in').value.trim();
-                if(tk !== MASTER_TICKET) return alert("TICKET INVÁLIDO O VACÍO");
+            if((already || !isFree) && document.getElementById('ticket-in').value !== MASTER_TICKET) {
+                return alert("NECESITAS UN TICKET VÁLIDO");
             }
 
             document.getElementById('spin-btn').disabled = true;
-            document.getElementById('result-display').innerText = "GIRANDO...";
-
             const total = PREMIOS.reduce((s,i) => s + i.w, 0);
             let r = Math.random() * total;
             let win = PREMIOS[0];
@@ -173,23 +156,20 @@
             }, 30);
         }
 
-        async function finishSpin(win) {
-            document.getElementById('result-display').innerText = `🎁 ${win.n}`;
+        function finishSpin(win) {
+            document.getElementById('result-display').innerText = `REVELADO: ${win.n}`;
             activeUser.last = new Date().toDateString();
             logs.unshift({ user: activeUser.name, prize: win.n, time: new Date().toLocaleTimeString() });
-            localStorage.setItem('bocchi_v5_logs', JSON.stringify(logs));
+            localStorage.setItem('bocchi_logs_v1', JSON.stringify(logs));
             save();
             checkStatus();
             document.getElementById('spin-btn').disabled = false;
             
-            // WEBHOOK
-            try {
-                await fetch(DISCORD_WEBHOOK, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({content: `🚨 **${activeUser.name}** ganó: **${win.n}** (Rango ${win.r})`})
-                });
-            } catch(e) {}
+            fetch(DISCORD_WEBHOOK, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({content: `🎁 **${activeUser.name}** ha obtenido: **${win.n}** [${win.r}]`})
+            }).catch(() => {});
         }
 
         function showAdmin() {
@@ -198,21 +178,21 @@
             document.getElementById('admin-log').innerHTML = logs.map(l => `<tr><td>${l.user}</td><td>${l.prize}</td><td>${l.time}</td></tr>`).join('');
         }
 
-        function save() { localStorage.setItem('bocchi_v5_users', JSON.stringify(users)); }
+        function save() { localStorage.setItem('bocchi_final_v1', JSON.stringify(users)); }
 
         function draw() {
             const canvas = document.getElementById('wheel');
             const ctx = canvas.getContext('2d');
             const arc = Math.PI * 2 / PREMIOS.length;
             for(let i=0; i<PREMIOS.length; i++) {
-                ctx.fillStyle = (i % 2 === 0) ? "#000" : "#111";
+                ctx.fillStyle = (i % 2 === 0) ? "#000" : "#0a0a0a";
                 ctx.beginPath(); ctx.moveTo(250,250);
                 ctx.arc(250, 250, 250, i*arc, (i+1)*arc);
                 ctx.fill();
-                ctx.strokeStyle = "#bc13fe"; ctx.stroke();
+                ctx.strokeStyle = "#bc13fe"; ctx.lineWidth = 2; ctx.stroke();
                 ctx.save(); ctx.translate(250,250); ctx.rotate(i*arc + arc/2);
-                ctx.fillStyle = "#00f5ff"; ctx.font = "bold 20px Orbitron";
-                ctx.fillText(PREMIOS[i].r, 170, 8); ctx.restore();
+                ctx.fillStyle = "#00f5ff"; ctx.font = "bold 22px Orbitron";
+                ctx.fillText(PREMIOS[i].r, 170, 10); ctx.restore();
             }
         }
     </script>
