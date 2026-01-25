@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ruleta Comodines</title>
+    <title>Pokemon Chaos Cup</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@600&display=swap" rel="stylesheet">
     <style>
         :root { --turq: #00f5ff; --purp: #bc13fe; --bg: #000000; }
@@ -37,6 +37,7 @@
             <canvas id="wheel" width="500" height="500"></canvas>
         </div>
         <div id="ticket-area" class="hidden">
+            <p style="font-size: 0.7em; color: var(--purp); margin-bottom: 5px;">DÍA BLOQUEADO O YA GIRADO</p>
             <input type="password" id="ticket-in" placeholder="CÓDIGO TICKET">
         </div>
         <button class="btn" id="spin-btn" onclick="spin()">GIRAR</button>
@@ -52,7 +53,7 @@
 
     <script>
         // CONFIGURACIÓN
-        const MASTER_TICKET = "";
+        const MASTER_TICKET = "BOCCHI-ROCK"; 
         const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1465016757910769705/ODWb5Q5vgXxN3POMZ6-znJ_lX_-tMHQ5LxvS6HYZBHe5o3QvxdVU5kuXuZjSpxxieESG"; 
 
         let PREMIOS = [
@@ -73,10 +74,8 @@
         function login() {
             const u = document.getElementById('user-in').value.trim();
             const p = document.getElementById('pass-in').value.trim();
-            
             if(!u || !p) { alert("RELLENA TODO"); return; }
 
-            // Acceso Admin (BocchiAdmin / Luna288)
             if(u === "BocchiAdmin" && p === "Luna288") {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('admin-screen').classList.remove('hidden');
@@ -90,9 +89,9 @@
                 user = { name: u, pass: p, last: null };
                 users.push(user);
                 localStorage.setItem('bocchi_v5_users', JSON.stringify(users));
-                alert("REGISTRADO!");
+                alert("¡REGISTRADO!");
             } else if(user.pass !== p) {
-                alert("PASS INCORRECTA"); return;
+                alert("ESTE ENTRENADOR YA EXISTE Y LA CONTRASEÑA ES INCORRECTA"); return;
             }
 
             activeUser = user;
@@ -100,47 +99,60 @@
             document.getElementById('app-screen').classList.remove('hidden');
             document.getElementById('greet').innerText = `ENTRENADOR: ${u}`;
             draw();
-            checkTicket();
+            updateUIVisibility();
         }
 
-        function checkTicket() {
+        function updateUIVisibility() {
+            const esDiaImpar = (new Date().getDate() % 2 !== 0);
             const yaGiroHoy = (activeUser.last === new Date().toDateString());
-            if(yaGiroHoy) document.getElementById('ticket-area').classList.remove('hidden');
+            
+            // Bloquea si ya giró hoy O si es día par (2, 4, 6...)
+            if(yaGiroHoy || !esDiaImpar) {
+                document.getElementById('ticket-area').classList.remove('hidden');
+            } else {
+                document.getElementById('ticket-area').classList.add('hidden');
+            }
         }
 
         function spin() {
+            const esDiaImpar = (new Date().getDate() % 2 !== 0);
             const yaGiroHoy = (activeUser.last === new Date().toDateString());
-            if(yaGiroHoy && document.getElementById('ticket-in').value !== MASTER_TICKET) {
-                alert("YA GIRASTE HOY. NECESITAS TICKET."); return;
+            
+            if(yaGiroHoy || !esDiaImpar) {
+                if(document.getElementById('ticket-in').value !== MASTER_TICKET) {
+                    alert("SISTEMA BLOQUEADO: Necesitas el Ticket Maestro para girar hoy."); 
+                    return;
+                }
             }
 
             const btn = document.getElementById('spin-btn');
             btn.disabled = true;
+            document.getElementById('result-display').innerText = "GIRANDO...";
+
+            const deg = Math.floor(3600 + Math.random() * 360);
+            document.getElementById('wheel').style.transform = `rotate(${deg}deg)`;
 
             const total = PREMIOS.reduce((s,i) => s + i.w, 0);
             let r = Math.random() * total;
             let win = PREMIOS[0];
             for(let i of PREMIOS) { if(r < i.w) { win = i; break; } r -= i.w; }
 
-            const deg = Math.floor(3600 + Math.random() * 360);
-            document.getElementById('wheel').style.transform = `rotate(${deg}deg)`;
-
             setTimeout(() => {
-                document.getElementById('result-display').innerText = `PREMIO: ${win.n}`;
+                document.getElementById('result-display').innerText = `¡GANASTE: ${win.n}!`;
                 activeUser.last = new Date().toDateString();
                 logs.unshift({ user: activeUser.name, prize: win.n, time: new Date().toLocaleTimeString() });
                 localStorage.setItem('bocchi_v5_logs', JSON.stringify(logs));
+                localStorage.setItem('bocchi_v5_users', JSON.stringify(users));
                 
-                // Enviar a Discord
                 if(DISCORD_WEBHOOK) {
                     fetch(DISCORD_WEBHOOK, {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({content: `🎁 **${activeUser.name}** ha ganado: **${win.n}**`})
-                    });
+                        body: JSON.stringify({content: `🏆 **${activeUser.name}** ha ganado: **${win.n}** (Rango ${win.r})`})
+                    }).catch(() => {});
                 }
                 btn.disabled = false;
-                checkTicket();
+                updateUIVisibility();
             }, 4000);
         }
 
