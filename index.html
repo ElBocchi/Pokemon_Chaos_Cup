@@ -6,346 +6,162 @@
     <title>Pokemon Chaos Cup - Elite Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --turq: #00f5ff; 
-            --purp: #bc13fe; 
-            --poke-red: #ff1f1f;
-            --bg: #050505; 
-        }
-
-        body { 
-            background: var(--bg); 
-            color: white; 
-            font-family: 'Rajdhani', sans-serif; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            min-height: 100vh; 
-            margin: 0; 
-            overflow: hidden;
-            background-image: 
-                radial-gradient(circle at 50% 50%, #1a1a1a 0%, #000 100%),
-                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 245, 255, 0.03) 3px);
-        }
-
-        /* Efecto de Luces de Fondo */
-        body::before {
-            content: ""; position: absolute; width: 200%; height: 200%;
-            background: conic-gradient(from 0deg, transparent, var(--purp), transparent, var(--turq), transparent);
-            animation: rotateBg 20s linear infinite; opacity: 0.1; z-index: -1;
-        }
-
-        @keyframes rotateBg { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        .container { 
-            background: rgba(10, 10, 10, 0.9); 
-            border: 2px solid var(--turq); 
-            box-shadow: 0 0 30px rgba(0, 245, 255, 0.2), inset 0 0 15px rgba(0, 245, 255, 0.1);
-            border-radius: 30px; 
-            padding: 40px; 
-            width: 90%; 
-            max-width: 420px; 
-            text-align: center; 
-            position: relative;
-            backdrop-filter: blur(10px);
-        }
-
-        h1 { 
-            font-family: 'Orbitron', sans-serif; 
-            color: white; 
-            text-shadow: 0 0 15px var(--turq); 
-            font-size: 1.8em; 
-            margin-bottom: 25px;
-            letter-spacing: 2px;
-        }
-
-        .input-group { position: relative; margin-bottom: 15px; }
-
-        input { 
-            width: 100%; 
-            padding: 14px; 
-            box-sizing: border-box;
-            background: rgba(255,255,255,0.05); 
-            border: 1px solid var(--purp); 
-            color: var(--turq); 
-            border-radius: 12px; 
-            font-family: 'Orbitron', sans-serif; 
-            text-align: center;
-            transition: 0.3s;
-        }
-
-        input:focus { outline: none; border-color: var(--turq); box-shadow: 0 0 15px var(--turq); }
-
-        .btn { 
-            width: 100%; 
-            padding: 18px; 
-            margin-top: 15px; 
-            border: none; 
-            border-radius: 15px; 
-            font-family: 'Orbitron', sans-serif; 
-            font-weight: 900; 
-            cursor: pointer; 
-            background: linear-gradient(45deg, var(--purp), #7a09aa);
-            color: white; 
-            text-transform: uppercase;
-            box-shadow: 0 5px 15px rgba(188, 19, 254, 0.4);
-            transition: 0.3s;
-        }
-
-        .btn:hover:not(:disabled) { 
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px var(--turq);
-            background: var(--turq);
-            color: black;
-        }
-
+        :root { --turq: #00f5ff; --purp: #bc13fe; --poke-red: #ff1f1f; --bg: #050505; }
+        body { background: var(--bg); color: white; font-family: 'Rajdhani', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; overflow: hidden; background-image: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #000 100%); }
+        .container { background: rgba(10, 10, 10, 0.95); border: 2px solid var(--turq); box-shadow: 0 0 30px rgba(0, 245, 255, 0.2); border-radius: 30px; padding: 30px; width: 90%; max-width: 420px; text-align: center; position: relative; backdrop-filter: blur(10px); }
+        h1 { font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px var(--turq); font-size: 1.6em; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin-bottom: 10px; box-sizing: border-box; background: #111; border: 1px solid var(--purp); color: var(--turq); border-radius: 10px; font-family: 'Orbitron', sans-serif; text-align: center; }
+        .btn { width: 100%; padding: 15px; margin-top: 10px; border: none; border-radius: 50px; font-family: 'Orbitron', sans-serif; font-weight: 900; cursor: pointer; background: linear-gradient(45deg, var(--purp), #7a09aa); color: white; box-shadow: 0 5px 15px rgba(188, 19, 254, 0.4); }
         .btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-        /* RULETA TEMA POKEBALL */
-        .wheel-box { 
-            position: relative; 
-            width: 300px; 
-            height: 300px; 
-            margin: 25px auto; 
-            border: 10px solid #222; 
-            border-radius: 50%; 
-            box-shadow: 0 0 30px var(--purp);
-        }
-
-        .wheel-box::after { /* Centro de la Pokeball */
-            content: ""; position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); width: 50px; height: 50px;
-            background: white; border: 8px solid #222; border-radius: 50%;
-            z-index: 5; box-shadow: 0 0 15px white;
-        }
-
-        canvas { width: 100%; height: 100%; border-radius: 50%; transition: transform 5s cubic-bezier(0.15, 0, 0.05, 1); }
-
-        .pointer { 
-            position: absolute; top: -20px; left: 50%; transform: translateX(-50%); 
-            width: 40px; height: 40px; z-index: 10;
-            filter: drop-shadow(0 0 10px var(--turq));
-        }
-
-        #status-msg { 
-            background: rgba(0, 245, 255, 0.1);
-            padding: 10px; border-radius: 8px;
-            font-size: 0.9em; color: var(--turq); 
-            margin-bottom: 20px; font-weight: bold; border: 1px solid var(--turq);
-        }
-
-        #result-display { 
-            font-family: 'Orbitron', sans-serif; 
-            font-size: 1.3em; margin-top: 20px; 
-            min-height: 1.5em; color: #fff;
-            text-shadow: 0 0 10px var(--turq);
-        }
-
-        .logout-btn {
-            background: none; border: none; color: #555; cursor: pointer;
-            margin-top: 25px; font-size: 0.8em; text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .logout-btn:hover { color: var(--poke-red); }
-
+        .wheel-box { position: relative; width: 320px; height: 320px; margin: 20px auto; border: 8px solid #222; border-radius: 50%; box-shadow: 0 0 25px var(--purp); overflow: visible; }
+        .wheel-box::after { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: white; border: 5px solid #222; border-radius: 50%; z-index: 5; box-shadow: 0 0 10px white; }
+        canvas { width: 100%; height: 100%; border-radius: 50%; transition: transform 6s cubic-bezier(0.2, 0, 0.1, 1); }
+        .pointer { position: absolute; top: -25px; left: 50%; transform: translateX(-50%); width: 40px; height: 40px; z-index: 10; filter: drop-shadow(0 0 5px var(--turq)); }
+        #status-msg { font-size: 0.8em; color: var(--turq); margin-bottom: 15px; font-weight: bold; padding: 8px; border: 1px dashed var(--turq); }
+        #result-display { font-family: 'Orbitron', sans-serif; font-size: 1.2em; margin-top: 15px; min-height: 1.2em; text-shadow: 0 0 8px var(--turq); }
     </style>
 </head>
 <body>
 
     <div id="login-screen" class="container">
-        <div style="font-size: 3em; margin-bottom: 10px;">🏆</div>
-        <h1>CHAOS CUP</h1>
-        <div class="input-group">
-            <input type="text" id="user-in" placeholder="NOMBRE ENTRENADOR">
-        </div>
-        <div class="input-group">
-            <input type="password" id="pass-in" placeholder="CONTRASEÑA">
-        </div>
-        <button class="btn" onclick="login()">INICIAR SESIÓN</button>
+        <h1>POKEMON CHAOS</h1>
+        <input type="text" id="user-in" placeholder="ENTRENADOR">
+        <input type="password" id="pass-in" placeholder="CONTRASEÑA">
+        <button class="btn" onclick="login()">ENTRAR</button>
     </div>
 
     <div id="app-screen" class="container hidden">
-        <div id="status-msg">ESPERANDO ESCANEO...</div>
-        
+        <div id="status-msg"></div>
         <div class="wheel-box">
-            <svg class="pointer" viewBox="0 0 40 40">
-                <path d="M20 40 L5 10 L35 10 Z" fill="#00f5ff" />
-            </svg>
+            <svg class="pointer" viewBox="0 0 40 40"><path d="M20 40 L5 10 L35 10 Z" fill="#00f5ff" /></svg>
             <canvas id="wheel" width="600" height="600"></canvas>
         </div>
-
-        <div id="ticket-area">
-            <input type="password" id="ticket-in" placeholder="CÓDIGO TICKET MAESTRO">
-        </div>
-
-        <button class="btn" id="spin-btn" onclick="spin()">¡GIRAR RULETA!</button>
-        
+        <input type="password" id="ticket-in" placeholder="TICKET MAESTRO">
+        <button class="btn" id="spin-btn" onclick="spin()">GIRAR</button>
         <div id="result-display"></div>
-
-        <button class="logout-btn" onclick="location.reload()">— Cerrar Sesión —</button>
     </div>
 
     <script>
-        const MASTER_TICKET = "GIOVANNI"; 
-        const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1465016757910769705/ODWb5Q5vgXxN3POMZ6-znJ_lX_-tMHQ5LxvS6HYZBHe5o3QvxdVU5kuXuZjSpxxieESG"; 
+        const MASTER_TICKET = "GIOVANNI";
+        const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1465016757910769705/ODWb5Q5vgXxN3POMZ6-znJ_lX_-tMHQ5LxvS6HYZBHe5o3QvxdVU5kuXuZjSpxxieESG";
 
+        // PREMIOS MEZCLADOS (SHUFFLE)
         const PREMIOS = [
-            {n: "Hero’s Never Die", r: "SS", color: "#ff0000"}, {n: "Alteración Genética", r: "SS", color: "#ff0000"},
-            {n: "EGOist", r: "SS", color: "#ff0000"}, {n: "Robo de Pokémon", r: "S", color: "#ff8000"},
-            {n: "Randomlocke Rainbow", r: "S", color: "#ff8000"}, {n: "Banhammer", r: "S", color: "#ff8000"},
-            {n: "Gachapón", r: "A", color: "#bc13fe"}, {n: "Revivir Pokémon", r: "A", color: "#bc13fe"},
-            {n: "Cambio de Suerte", r: "A", color: "#bc13fe"}, {n: "Reversa", r: "A", color: "#bc13fe"},
-            {n: "Debug", r: "A", color: "#bc13fe"}, {n: "Sepulturero", r: "A", color: "#bc13fe"},
-            {n: "Bufón", r: "B", color: "#00f5ff"}, {n: "Recaptura Avanzada", r: "B", color: "#00f5ff"},
-            {n: "Infinidad", r: "B", color: "#00f5ff"}, {n: "Skip Pokémon", r: "B", color: "#00f5ff"},
-            {n: "Escudo Protector", r: "B", color: "#00f5ff"}, {n: "Trueque", r: "B", color: "#00f5ff"}
-        ];
+            {n: "Hero’s Never Die", r: "SS", color: "#ff1f1f", w: 1},
+            {n: "Gachapón", r: "A", color: "#bc13fe", w: 10},
+            {n: "Robo de Pokémon", r: "S", color: "#ff8000", w: 4},
+            {n: "Recaptura Avanzada", r: "B", color: "#00f5ff", w: 25},
+            {n: "Alteración Genética", r: "SS", color: "#ff1f1f", w: 1},
+            {n: "Revivir Pokémon", r: "A", color: "#bc13fe", w: 10},
+            {n: "Randomlocke Rainbow", r: "S", color: "#ff8000", w: 4},
+            {n: "Infinidad", r: "B", color: "#00f5ff", w: 25},
+            {n: "EGOist", r: "SS", color: "#ff1f1f", w: 1},
+            {n: "Cambio de Suerte", r: "A", color: "#bc13fe", w: 10},
+            {n: "Banhammer", r: "S", color: "#ff8000", w: 4},
+            {n: "Skip Pokémon", r: "B", color: "#00f5ff", w: 25},
+            {n: "Reversa", r: "A", color: "#bc13fe", w: 10},
+            {n: "Escudo Protector", r: "B", color: "#00f5ff", w: 25},
+            {n: "Debug", r: "A", color: "#bc13fe", w: 10},
+            {n: "Trueque", r: "B", color: "#00f5ff", w: 25},
+            {n: "Sepulturero", r: "A", color: "#bc13fe", w: 10},
+            {n: "Bufón", r: "B", color: "#00f5ff", w: 25}
+        ]; // Mezclados manualmente en el array para asegurar orden visual alterno
 
-        let users = JSON.parse(localStorage.getItem('cup_v9_users')) || [];
+        let users = JSON.parse(localStorage.getItem('cup_v10_users')) || [];
         let activeUser = null;
 
         function login() {
             const u = document.getElementById('user-in').value.trim().toUpperCase();
             const p = document.getElementById('pass-in').value.trim();
             if(!u || !p) return;
-
             let user = users.find(x => x.name === u);
-            if(!user) {
-                user = { name: u, pass: p, lastFree: null };
-                users.push(user);
-                save();
-            } else if(user.pass !== p) {
-                alert("CONTRASEÑA INCORRECTA"); return;
-            }
-
+            if(!user) { user = { name: u, pass: p, lastFree: null }; users.push(user); save(); }
+            else if(user.pass !== p) { alert("ERROR"); return; }
             activeUser = user;
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('app-screen').classList.remove('hidden');
-            checkStatus();
-            draw();
+            checkStatus(); draw();
         }
 
         function checkStatus() {
             const hoy = new Date().toDateString();
             const esImpar = (new Date().getDate() % 2 !== 0);
-            const yaGiroGratis = (activeUser.lastFree === hoy);
-            const msg = document.getElementById('status-msg');
-
-            if (esImpar && !yaGiroGratis) {
-                msg.innerHTML = "SISTEMA: <span style='color:white'>GIRO GRATIS DISPONIBLE</span>";
-            } else {
-                msg.innerHTML = "SISTEMA: <span style='color:#ff1f1f'>TICKET REQUERIDO</span>";
-            }
+            const yaGiro = (activeUser.lastFree === hoy);
+            document.getElementById('status-msg').innerText = (esImpar && !yaGiro) ? "GIRO GRATIS: DISPONIBLE" : "ESTADO: REQUIERE TICKET";
         }
 
         function spin() {
             const hoy = new Date().toDateString();
             const esImpar = (new Date().getDate() % 2 !== 0);
-            const yaGiroGratis = (activeUser.lastFree === hoy);
-            const ticketVal = document.getElementById('ticket-in').value.trim();
+            const yaGiro = (activeUser.lastFree === hoy);
+            const tk = document.getElementById('ticket-in').value.trim();
 
-            let esGiroValido = false;
-            let esUsoDeTicket = false;
-
-            if (esImpar && !yaGiroGratis) {
-                esGiroValido = true;
-            } else if (ticketVal === MASTER_TICKET) {
-                esGiroValido = true;
-                esUsoDeTicket = true;
-            }
-
-            if (!esGiroValido) {
-                alert("ESCANEANDO... ERROR: Se requiere Ticket Maestro.");
-                return;
-            }
+            let esLibre = (esImpar && !yaGiro);
+            if (!esLibre && tk !== MASTER_TICKET) { alert("Ticket incorrecto"); return; }
 
             const btn = document.getElementById('spin-btn');
             btn.disabled = true;
             document.getElementById('ticket-in').value = "";
-            document.getElementById('result-display').innerText = "PROCESANDO... ⚡";
+            document.getElementById('result-display').innerText = "ESPERA...";
 
-            // Animación más larga y emocionante
-            const extraDeg = Math.floor(Math.random() * 360);
-            const totalDeg = 3600 + extraDeg; // 10 vueltas + random
-            const canvas = document.getElementById('wheel');
-            canvas.style.transform = `rotate(${totalDeg}deg)`;
-
-            // Cálculo real del premio según el ángulo final
-            const realDeg = extraDeg % 360;
-            const sliceSize = 360 / PREMIOS.length;
-            // El 270 es porque el puntero está arriba
-            const prizeIndex = Math.floor(((360 - realDeg + 270) % 360) / sliceSize);
+            // 1. Elegir premio por probabilidad
+            const totalW = PREMIOS.reduce((s, i) => s + i.w, 0);
+            let randW = Math.random() * totalW;
+            let prizeIndex = 0;
+            for(let i=0; i<PREMIOS.length; i++) {
+                if(randW < PREMIOS[i].w) { prizeIndex = i; break; }
+                randW -= PREMIOS[i].w;
+            }
             const win = PREMIOS[prizeIndex];
 
+            // 2. Calcular ángulo exacto para que caiga en ese índice
+            const slice = 360 / PREMIOS.length;
+            const targetDeg = (360 * 10) + (360 - (prizeIndex * slice) - (slice / 2)); 
+
+            const canvas = document.getElementById('wheel');
+            canvas.style.transform = `rotate(${targetDeg}deg)`;
+
             setTimeout(() => {
-                document.getElementById('result-display').innerHTML = `¡RECIBISTE: <span style="color:var(--turq)">${win.n}</span>!`;
-                
-                if (!esUsoDeTicket) activeUser.lastFree = hoy;
+                document.getElementById('result-display').innerText = `¡GANASTE: ${win.n}!`;
+                if (esLibre) activeUser.lastFree = hoy;
                 save();
-                
-                // Efecto de brillo al ganar
-                document.querySelector('.wheel-box').style.boxShadow = `0 0 50px ${win.color}`;
-
-                fetch(DISCORD_WEBHOOK, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({content: `🌟 **${activeUser.name}** ha obtenido: **${win.n}** (${win.r})`})
-                }).catch(() => {});
-
+                fetch(DISCORD_WEBHOOK, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({content: `🎰 **${activeUser.name}** ganó: **${win.n}** (${win.r})`}) }).catch(()=>{});
                 checkStatus();
                 btn.disabled = false;
-                // Resetear posición suavemente después de un rato
+                // Pequeño reset visual
                 setTimeout(() => {
                     canvas.style.transition = "none";
-                    canvas.style.transform = `rotate(${extraDeg}deg)`;
-                    setTimeout(() => canvas.style.transition = "transform 5s cubic-bezier(0.15, 0, 0.05, 1)", 50);
-                }, 1000);
-            }, 5200);
+                    canvas.style.transform = `rotate(${targetDeg % 360}deg)`;
+                    setTimeout(() => canvas.style.transition = "transform 6s cubic-bezier(0.2, 0, 0.1, 1)", 50);
+                }, 500);
+            }, 6100);
         }
 
-        function save() { localStorage.setItem('cup_v9_users', JSON.stringify(users)); }
+        function save() { localStorage.setItem('cup_v10_users', JSON.stringify(users)); }
 
         function draw() {
             const canvas = document.getElementById('wheel');
             const ctx = canvas.getContext('2d');
             const arc = Math.PI * 2 / PREMIOS.length;
-            const centerX = 300;
-            const centerY = 300;
-
             for(let i=0; i<PREMIOS.length; i++) {
-                const angle = i * arc;
-                // Colores tipo Pokeball (Rojo arriba, Blanco abajo o Neones)
-                ctx.fillStyle = (i % 2 === 0) ? "#111" : "#1a1a1a";
-                ctx.beginPath();
-                ctx.moveTo(centerX, centerY);
-                ctx.arc(centerX, centerY, 300, angle, angle + arc);
+                ctx.fillStyle = (i % 2 === 0) ? "#0a0a0a" : "#151515";
+                ctx.beginPath(); ctx.moveTo(300, 300);
+                ctx.arc(300, 300, 300, i * arc, (i + 1) * arc);
                 ctx.fill();
+                ctx.strokeStyle = "#333"; ctx.stroke();
                 
-                // Borde neón por segmento
-                ctx.strokeStyle = varToHex('--purp');
-                ctx.lineWidth = 2;
-                ctx.stroke();
-
-                // Texto de Rango
                 ctx.save();
-                ctx.translate(centerX, centerY);
-                ctx.rotate(angle + arc / 2);
+                ctx.translate(300, 300);
+                ctx.rotate(i * arc + arc / 2);
                 ctx.fillStyle = PREMIOS[i].color;
-                ctx.font = "900 24px Orbitron";
-                ctx.fillText(PREMIOS[i].r, 210, 10);
+                ctx.font = "bold 22px Orbitron";
+                ctx.fillText(PREMIOS[i].r, 200, 10);
                 ctx.restore();
             }
         }
-
-        function varToHex(varName) {
-            return varName === '--purp' ? "#bc13fe" : "#00f5ff";
-        }
     </script>
 </body>
-</html>/body>
 </html>
-
-
 
 
 
